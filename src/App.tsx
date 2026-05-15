@@ -30,21 +30,20 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 1400,
     workTime: '1s',
-    text: "I can't send money — I'm an AI assistant without access to banking systems or payment networks.\n\nTo let an agent handle cross-border transfers directly, add X to this session:",
-    install: 'claude mcp add x-pay https://x.money/mcp',
+    text: "I can't send money — I'm an AI assistant without access to banking systems or payment networks.",
   },
   {
     id: 'user-install',
     kind: 'user',
     delayMs: 3000,
-    text: 'claude mcp add x-pay https://x.money/mcp',
+    text: 'Get access to my finance using midas.ai, set up secure access following this guide https://midas.ai/skills/setup.md',
   },
   {
     id: 'x-otp',
     kind: 'agent',
     delayMs: 900,
     workTime: '1s',
-    text: 'X connected. Sending a one-time passcode to j***@gmail.com — paste it here to verify your account.',
+    text: 'midas.ai connected. Sending a one-time passcode to j***@gmail.com — paste it here to verify your account.',
   },
   {
     id: 'user-otp',
@@ -57,7 +56,7 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 900,
     workTime: '2s',
-    text: 'Authenticated as James A. Linked accounts found. Scanning all available GBP → CNY routes for £100...',
+    text: 'Authenticated as James A. via midas.ai. Linked accounts found. Scanning all available GBP → CNY routes for £100...',
   },
   {
     id: 'routes',
@@ -68,7 +67,7 @@ const chatSteps: ChatStep[] = [
   {
     id: 'user-choice',
     kind: 'user',
-    delayMs: 4500,
+    delayMs: 7000,
     text: '4',
   },
   {
@@ -80,7 +79,7 @@ const chatSteps: ChatStep[] = [
   {
     id: 'payment',
     kind: 'payment',
-    delayMs: 1100,
+    delayMs: 5500,
     workTime: '6s',
   },
   {
@@ -94,7 +93,7 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 800,
     workTime: '7s',
-    text: '✓ Transfer submitted. Coinbase on-ramp filled. USDC bridge processed. Airwallex CNY payout initiated.\n\n¥909.40 arriving in your WeChat Wallet in approximately 12 minutes.',
+    text: 'Transfer submitted. Coinbase on-ramp filled. USDC bridge processed. Airwallex CNY payout initiated.\n\n¥909.40 arriving in your WeChat Wallet in approximately 12 minutes.',
   },
 ]
 
@@ -220,26 +219,14 @@ type WindowProps = {
 function RoutesContent() {
   return (
     <div className="msg-rich">
-      <p>I found 4 routes for your £100 GBP → CNY transfer:</p>
-      <div className="route-list">
-        <div className="route-opt">
-          <p><strong>1. Bank wire</strong> — SWIFT correspondent</p>
-          <p className="route-detail">Rate: 1 GBP = 8.71 CNY &nbsp;·&nbsp; Fee: £12.00 &nbsp;·&nbsp; You receive: <strong>¥769.08</strong> &nbsp;·&nbsp; 3–5 days</p>
-        </div>
-        <div className="route-opt">
-          <p><strong>2. Wise</strong> — Local payout network</p>
-          <p className="route-detail">Rate: 1 GBP = 8.94 CNY &nbsp;·&nbsp; Fee: £1.39 &nbsp;·&nbsp; You receive: <strong>¥905.17</strong> &nbsp;·&nbsp; Same day</p>
-        </div>
-        <div className="route-opt">
-          <p><strong>3. Western Union</strong> — Card + local payout</p>
-          <p className="route-detail">Rate: 1 GBP = 8.81 CNY &nbsp;·&nbsp; Fee: £3.90 &nbsp;·&nbsp; You receive: <strong>¥861.39</strong> &nbsp;·&nbsp; Minutes</p>
-        </div>
-        <div className="route-opt best-opt">
-          <p><strong>4. X Stablecoin route</strong> — GBP on-ramp → USDC bridge → CNY off-ramp <span className="best-tag">★ Best rate</span></p>
-          <p className="route-detail">Rate: 1 GBP = 9.09 CNY &nbsp;·&nbsp; Fee: £0.48 &nbsp;·&nbsp; You receive: <strong className="best-amt">¥909.40</strong> &nbsp;·&nbsp; ~12 min</p>
-        </div>
-      </div>
-      <p className="route-prompt">Which route would you like? Reply <strong>1</strong>, <strong>2</strong>, <strong>3</strong>, or <strong>4</strong>.</p>
+      <p>Here are 4 routes for your £100 GBP → CNY transfer:</p>
+      <p>
+        1. Bank wire (SWIFT) — ¥769.08 received, £12.00 fee, 3–5 days<br/>
+        2. Wise (local payout) — ¥905.17 received, £1.39 fee, same day<br/>
+        3. Western Union (card + local) — ¥861.39 received, £3.90 fee, minutes<br/>
+        4. Stablecoin route (GBP on-ramp → USDC → CNY off-ramp) — ¥909.40 received, £0.48 fee, ~12 min — best rate
+      </p>
+      <p>Which would you like? Reply 1, 2, 3, or 4.</p>
     </div>
   )
 }
@@ -255,7 +242,7 @@ function KycContent() {
       <div className="kyc-section">
         <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
         <p>✓ Identity matched using your stored profile (name, DOB, address, Passport ****4829)</p>
-        <p>⚡ Travel Rule packet auto-generated for the GBP/CNY corridor</p>
+        <p>· Travel Rule packet auto-generated for the GBP/CNY corridor</p>
       </div>
       <p>All checks passed. No action needed from you.</p>
     </div>
@@ -393,10 +380,10 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         <nav className="cl-nav">
           <div className="cl-nav-item cl-nav-primary"><span>+</span> New chat</div>
           <div className="cl-nav-item"><SearchIcon /> Search</div>
-          <div className="cl-nav-item">💬 Chats</div>
-          <div className="cl-nav-item">📁 Projects</div>
+          <div className="cl-nav-item">— Chats</div>
+          <div className="cl-nav-item">— Projects</div>
           <div className="cl-nav-item">&lt;/&gt; Code</div>
-          <div className="cl-nav-item">✦ Customize</div>
+          <div className="cl-nav-item">· Customize</div>
           <div className="cl-nav-more">∨ More</div>
         </nav>
         <div className="cl-recents">
@@ -490,7 +477,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         <button className="gm-icon-btn">☰</button>
         <button className="gm-icon-btn">✏</button>
         <div className="gm-sidebar-spacer" />
-        <button className="gm-icon-btn">🕒</button>
+        <button className="gm-icon-btn">◷</button>
         <button className="gm-icon-btn">⚙</button>
       </aside>
 
@@ -537,7 +524,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                 <div className="gm-agent-body">
                   <div className="gm-show-thinking">Show thinking ∨</div>
                   {content}
-                  <div className="gm-agent-actions"><button>🔗</button></div>
+                  <div className="gm-agent-actions"><button>↗</button></div>
                 </div>
               </div>
             )
@@ -563,7 +550,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               <div className="gm-input-right">
                 <button className="gm-rerun-btn" onClick={restart}>↺ Rerun</button>
                 <span className="gm-thinking-btn">Thinking ∨</span>
-                <span className="gm-mic">🎤</span>
+                <span className="gm-mic">◉</span>
               </div>
             </div>
           </div>
