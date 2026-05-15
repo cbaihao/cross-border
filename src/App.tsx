@@ -14,6 +14,7 @@ type ChatStep =
   | { id: string; delayMs: number; kind: 'agent'; workTime: string; text: string; install?: string }
   | { id: string; delayMs: number; kind: 'routes'; workTime: string }
   | { id: string; delayMs: number; kind: 'kyc'; workTime: string }
+  | { id: string; delayMs: number; kind: 'checking'; text: string }
   | { id: string; delayMs: number; kind: 'payment'; workTime: string }
 
 // ── Timeline ──────────────────────────────────────────────────────────────────
@@ -77,9 +78,22 @@ const chatSteps: ChatStep[] = [
     workTime: '5s',
   },
   {
+    id: 'kyc-check',
+    kind: 'checking',
+    delayMs: 5000,
+    text: 'Verifying credentials with Coinbase and Airwallex...',
+  },
+  {
+    id: 'kyc-result',
+    kind: 'agent',
+    delayMs: 5000,
+    workTime: '5s',
+    text: 'All KYC requirements satisfied — no action needed from you. Coinbase on-ramp and Airwallex off-ramp compliance fully handled for this corridor, including Travel Rule.',
+  },
+  {
     id: 'payment',
     kind: 'payment',
-    delayMs: 5500,
+    delayMs: 5000,
     workTime: '6s',
   },
   {
@@ -89,11 +103,17 @@ const chatSteps: ChatStep[] = [
     text: 'confirm',
   },
   {
+    id: 'x-submit',
+    kind: 'checking',
+    delayMs: 500,
+    text: 'Submitting transfer...',
+  },
+  {
     id: 'x-done',
     kind: 'agent',
-    delayMs: 800,
+    delayMs: 5000,
     workTime: '7s',
-    text: 'Transfer submitted. Coinbase on-ramp filled. USDC bridge processed. Airwallex CNY payout initiated.\n\n¥909.40 arriving in your WeChat Wallet in approximately 12 minutes.',
+    text: 'Transfer submitted. Coinbase on-ramp filled. USDC bridge processed. Airwallex CNY payout initiated.\n\n¥909.40 arriving in your WeChat Wallet in approximately 12 minutes.\n\nTrack your transaction history at midas.ai/histories',
   },
 ]
 
@@ -103,6 +123,7 @@ export default function App() {
   const isFast = new URLSearchParams(window.location.search).get('speed') === 'fast'
   const [platform, setPlatform] = useState<Platform>('codex')
   const [visibleCount, setVisibleCount] = useState(1)
+  const scrollYRef = useRef(0)
   const [runId, setRunId] = useState(1)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifDismissed, setNotifDismissed] = useState(false)
@@ -120,6 +141,10 @@ export default function App() {
     const t = window.setTimeout(() => setNotifOpen(true), 1800)
     return () => window.clearTimeout(t)
   }, [isComplete, notifDismissed, runId])
+
+  useEffect(() => {
+    window.scrollTo({ top: scrollYRef.current, behavior: 'instant' as ScrollBehavior })
+  }, [platform])
 
   const restart = () => {
     setVisibleCount(1)
@@ -150,7 +175,7 @@ export default function App() {
             <button
               key={p}
               className={`platform-tab ${platform === p ? 'active' : ''}`}
-              onClick={() => setPlatform(p)}
+              onClick={() => { scrollYRef.current = window.scrollY; setPlatform(p) }}
             >
               {p === 'codex' && <CodexLogo />}
               {p === 'claude' && <ClaudeLogo />}
@@ -234,17 +259,26 @@ function RoutesContent() {
 function KycContent() {
   return (
     <div className="msg-rich">
-      <p>Checking KYC requirements for route 4 (stablecoin):</p>
+      <p>KYC requirements for route 4 (stablecoin):</p>
       <div className="kyc-section">
         <p><strong>On-ramp — Coinbase Institutional (GBP → USDC)</strong></p>
-        <p>✓ KYC verified — your existing Coinbase account qualifies. No new forms required.</p>
+        <p>· Existing Coinbase account on file — KYC previously verified, no new forms required</p>
+        <p>· GBP source of funds: Barclays current account **** 8842</p>
       </div>
       <div className="kyc-section">
         <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
-        <p>✓ Identity matched using your stored profile (name, DOB, address, Passport ****4829)</p>
-        <p>· Travel Rule packet auto-generated for the GBP/CNY corridor</p>
+        <p>· Identity: name, DOB, address from stored profile</p>
+        <p>· Government ID: Passport ****4829</p>
+        <p>· Travel Rule packet: GBP/CNY corridor, auto-generated</p>
       </div>
-      <p>All checks passed. No action needed from you.</p>
+    </div>
+  )
+}
+
+function CheckingContent({ text }: { text: string }) {
+  return (
+    <div className="msg-rich">
+      <p className="checking-line"><span className="typing-dots"><i /><i /><i /></span>{text}</p>
     </div>
   )
 }
@@ -267,9 +301,10 @@ function PaymentContent() {
   )
 }
 
-function RichContent({ kind }: { kind: 'routes' | 'kyc' | 'payment' }) {
-  if (kind === 'routes') return <RoutesContent />
-  if (kind === 'kyc') return <KycContent />
+function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }> }) {
+  if (step.kind === 'routes') return <RoutesContent />
+  if (step.kind === 'kyc') return <KycContent />
+  if (step.kind === 'checking') return <CheckingContent text={step.text} />
   return <PaymentContent />
 }
 
@@ -336,7 +371,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                   )}
                 </>
               )
-              : <RichContent kind={step.kind} />
+              : <RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} />
 
             return (
               <div key={step.id} className="cx-msg-agent-wrap">
@@ -429,7 +464,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                   )}
                 </div>
               )
-              : <div className="cl-agent-text"><RichContent kind={step.kind} /></div>
+              : <div className="cl-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
 
             return (
               <div key={step.id} className="cl-msg-agent-wrap">
@@ -514,7 +549,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                   )}
                 </div>
               )
-              : <div className="gm-agent-text"><RichContent kind={step.kind} /></div>
+              : <div className="gm-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
 
             return (
               <div key={step.id} className="gm-msg-agent-wrap">

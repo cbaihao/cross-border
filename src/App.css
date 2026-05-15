@@ -150,6 +150,10 @@ h1 {
 .pay-hl { background: #f0fdf4; }
 .pay-hl span { color: #15803d !important; font-weight: 700; }
 
+/* ── Checking line ───────────────────────────────────────────────────────── */
+
+.checking-line { display: flex; align-items: center; gap: 8px; color: var(--muted); font-style: italic; }
+
 /* ── Typing dots (shared) ────────────────────────────────────────────────── */
 
 .typing-dots { display: inline-flex; gap: 4px; align-items: center; }
