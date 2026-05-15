@@ -123,7 +123,6 @@ export default function App() {
   const isFast = new URLSearchParams(window.location.search).get('speed') === 'fast'
   const [platform, setPlatform] = useState<Platform>('codex')
   const [visibleCount, setVisibleCount] = useState(1)
-  const scrollYRef = useRef(0)
   const [runId, setRunId] = useState(1)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifDismissed, setNotifDismissed] = useState(false)
@@ -142,11 +141,7 @@ export default function App() {
     return () => window.clearTimeout(t)
   }, [isComplete, notifDismissed, runId])
 
-  useEffect(() => {
-    window.scrollTo({ top: scrollYRef.current, behavior: 'instant' as ScrollBehavior })
-  }, [platform])
-
-  const restart = () => {
+const restart = () => {
     setVisibleCount(1)
     setNotifOpen(false)
     setNotifDismissed(false)
@@ -175,7 +170,7 @@ export default function App() {
             <button
               key={p}
               className={`platform-tab ${platform === p ? 'active' : ''}`}
-              onClick={() => { scrollYRef.current = window.scrollY; setPlatform(p) }}
+              onClick={() => setPlatform(p)}
             >
               {p === 'codex' && <CodexLogo />}
               {p === 'claude' && <ClaudeLogo />}
@@ -311,8 +306,8 @@ function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc
 // ── CODEX WINDOW ──────────────────────────────────────────────────────────────
 
 function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
-  const endRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }) }, [visibleSteps.length])
+  const msgsRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight }, [visibleSteps.length])
 
   return (
     <div className="cx-window">
@@ -344,7 +339,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           <span className="cx-header-icons">···</span>
         </div>
 
-        <div className="cx-messages">
+        <div className="cx-messages" ref={msgsRef}>
           {visibleSteps.map((step, i) => {
             const prevKind = visibleSteps[i - 1]?.kind
             const isFirstAgent = (step.kind === 'agent' || step.kind === 'routes' || step.kind === 'kyc' || step.kind === 'payment') && prevKind === 'user'
@@ -384,7 +379,6 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
             )
           })}
           {showThinking && <div className="cx-thinking"><span className="typing-dots"><i /><i /><i /></span><span>Working…</span></div>}
-          <div ref={endRef} />
         </div>
 
         <div className="cx-input-area">
@@ -402,8 +396,8 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 // ── CLAUDE WINDOW ─────────────────────────────────────────────────────────────
 
 function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
-  const endRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }) }, [visibleSteps.length])
+  const msgsRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight }, [visibleSteps.length])
 
   return (
     <div className="cl-window">
@@ -442,7 +436,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           <button className="cl-share-btn">Share</button>
         </div>
 
-        <div className="cl-messages">
+        <div className="cl-messages" ref={msgsRef}>
           {visibleSteps.map((step) => {
             if (step.kind === 'user') return (
               <div key={step.id} className="cl-msg-user-wrap">
@@ -478,7 +472,6 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               <span className="typing-dots"><i /><i /><i /></span>
             </div>
           )}
-          <div ref={endRef} />
         </div>
 
         <div className="cl-input-area">
@@ -503,8 +496,8 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 // ── GEMINI WINDOW ─────────────────────────────────────────────────────────────
 
 function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
-  const endRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }) }, [visibleSteps.length])
+  const msgsRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight }, [visibleSteps.length])
 
   return (
     <div className="gm-window">
@@ -529,7 +522,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           </div>
         </div>
 
-        <div className="gm-messages">
+        <div className="gm-messages" ref={msgsRef}>
           {visibleSteps.map((step) => {
             if (step.kind === 'user') return (
               <div key={step.id} className="gm-msg-user-wrap">
@@ -573,7 +566,6 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               </div>
             </div>
           )}
-          <div ref={endRef} />
         </div>
 
         <div className="gm-input-area">
