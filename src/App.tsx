@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import claudeLogoSrc from './assets/claude-logo.svg'
+import openaiLogoSrc from './assets/openai-logo.png'
 
 // ── Platform type ─────────────────────────────────────────────────────────────
 
@@ -307,9 +309,6 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         <div className="cx-chats-section">
           <p className="cx-chats-label">Chats</p>
           <div className="cx-chat-item cx-chat-active">GBP → CNY transfer</div>
-          <div className="cx-chat-item">Research stablecoin rails</div>
-          <div className="cx-chat-item">Review KYC flow <span className="cx-chat-badge">Awaiting approval</span></div>
-          <div className="cx-chat-item cx-chat-muted">Accept Circle terms <span className="cx-chat-date">2d</span></div>
         </div>
         <div className="cx-sidebar-footer">
           <span className="cx-footer-settings"><SettingsIcon /> Settings</span>
@@ -403,10 +402,6 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         <div className="cl-recents">
           <p className="cl-recents-label">Recents</p>
           <div className="cl-recent-item cl-recent-active">GBP → CNY transfer <span>⋯</span></div>
-          <div className="cl-recent-item">Cross-border payments with stabl...</div>
-          <div className="cl-recent-item">AI agents and the future of financi...</div>
-          <div className="cl-recent-item">Building an AI agent for online mo...</div>
-          <div className="cl-recent-item">Remote work and human connecti...</div>
         </div>
         <div className="cl-sidebar-footer">
           <div className="cl-user-row">
@@ -426,9 +421,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         </div>
 
         <div className="cl-messages">
-          {visibleSteps.map((step, i) => {
-            const prevKind = visibleSteps[i - 1]?.kind
-
+          {visibleSteps.map((step) => {
             if (step.kind === 'user') return (
               <div key={step.id} className="cl-msg-user-wrap">
                 <div className="cl-msg-user"><p>{step.text}</p></div>
@@ -451,7 +444,6 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               )
               : <div className="cl-agent-text"><RichContent kind={step.kind} /></div>
 
-            const isFirstAgent = (step.kind !== 'user') && prevKind === 'user'
             return (
               <div key={step.id} className="cl-msg-agent-wrap">
                 {content}
@@ -509,7 +501,6 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           </div>
           <span className="gm-chat-title">GBP → CNY transfer</span>
           <div className="gm-header-right">
-            <button className="gm-upgrade-btn"><GeminiLogo /> Upgrade</button>
             <span className="gm-header-icon">⊕</span>
             <span className="gm-header-icon">⋯</span>
             <div className="gm-avatar">B</div>
@@ -517,7 +508,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         </div>
 
         <div className="gm-messages">
-          {visibleSteps.map((step, i) => {
+          {visibleSteps.map((step) => {
             if (step.kind === 'user') return (
               <div key={step.id} className="gm-msg-user-wrap">
                 <div className="gm-msg-user-actions"><button><CopyIcon /></button><button><EditIcon /></button></div>
@@ -591,33 +582,14 @@ function SettingsIcon() { return <svg width="13" height="13" viewBox="0 0 13 13"
 function CopyIcon() { return <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><path d="M2 9V2.5A1.5 1.5 0 013.5 1H9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg> }
 function EditIcon() { return <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2l2 2-6 6H3V8l6-6z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/></svg> }
 
-// OpenAI / Codex logo — the OpenAI polyhedron mark
+// OpenAI / Codex logo
 function CodexLogo() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="18" height="18" rx="3.5" fill="#000"/>
-      {/* OpenAI logo: 6 rotated overlapping triangles forming a hexagonal shape */}
-      <path
-        d="M9 2.8L13.2 5.3V10.2L9 12.7L4.8 10.2V5.3L9 2.8Z
-           M9 4.2L6 5.9V9.3L9 11L12 9.3V5.9L9 4.2Z"
-        fill="white"
-        fillRule="evenodd"
-      />
-      <circle cx="9" cy="7.6" r="1.35" fill="white"/>
-    </svg>
-  )
+  return <img src={openaiLogoSrc} width="18" height="18" style={{ borderRadius: 3.5 }} alt="Codex" />
 }
 
-// Claude logo — Anthropic's Claude icon (warm orange with the concentric-arc mark)
+// Claude logo
 function ClaudeLogo() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="18" height="18" rx="3.5" fill="#D97757"/>
-      {/* Claude's characteristic concentric-arc / sunrise shape */}
-      <path d="M4.5 12.5 Q6.5 6.5 9 5.5 Q11.5 6.5 13.5 12.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-      <path d="M6 12.5 Q7.5 8.5 9 7.5 Q10.5 8.5 12 12.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.7"/>
-    </svg>
-  )
+  return <img src={claudeLogoSrc} width="18" height="18" style={{ borderRadius: 3.5 }} alt="Claude" />
 }
 
 // Gemini logo — Google's exact 4-pointed star with gradient
