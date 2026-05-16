@@ -13,7 +13,8 @@ type ChatStep =
   | { id: string; delayMs: number; kind: 'user'; text: string }
   | { id: string; delayMs: number; kind: 'agent'; workTime: string; text: string; install?: string }
   | { id: string; delayMs: number; kind: 'routes'; workTime: string }
-  | { id: string; delayMs: number; kind: 'kyc'; workTime: string }
+  | { id: string; delayMs: number; kind: 'kyc-onramp' }
+  | { id: string; delayMs: number; kind: 'kyc-offramp' }
   | { id: string; delayMs: number; kind: 'checking'; text: string }
   | { id: string; delayMs: number; kind: 'payment'; workTime: string }
 
@@ -74,15 +75,25 @@ const chatSteps: ChatStep[] = [
     text: '4',
   },
   {
-    id: 'kyc',
-    kind: 'kyc',
+    id: 'kyc-onramp',
+    kind: 'kyc-onramp',
     delayMs: 1200,
-    workTime: '2s',
+  },
+  {
+    id: 'kyc-offramp',
+    kind: 'kyc-offramp',
+    delayMs: 1800,
+  },
+  {
+    id: 'kyc-checking',
+    kind: 'checking',
+    delayMs: 600,
+    text: 'Checking all KYC requirements and existing profile...',
   },
   {
     id: 'payment',
     kind: 'payment',
-    delayMs: 1400,
+    delayMs: 7000,
     workTime: '6s',
   },
   {
@@ -106,13 +117,18 @@ const chatSteps: ChatStep[] = [
   },
 ]
 
-/** Hide interim “submitting…” bubble once the completion message is shown. */
+/** Hide transient interim bubbles once the next phase is revealed. */
 function visibleStepsForDemo(visibleCount: number): ChatStep[] {
   const slice = chatSteps.slice(0, visibleCount)
+  const paymentIdx = chatSteps.findIndex(s => s.id === 'payment')
   const doneIdx = chatSteps.findIndex(s => s.id === 'x-done')
+  const paymentVisible = paymentIdx >= 0 && visibleCount > paymentIdx
   const transferDoneVisible = doneIdx >= 0 && visibleCount > doneIdx
-  if (!transferDoneVisible) return slice
-  return slice.filter(s => s.id !== 'x-submit')
+  return slice.filter(s => {
+    if (s.id === 'kyc-checking' && paymentVisible) return false
+    if (s.id === 'x-submit' && transferDoneVisible) return false
+    return true
+  })
 }
 
 // ── App ───────────────────────────────────────────────────────────────────────
@@ -286,25 +302,27 @@ function RoutesContent() {
   )
 }
 
-function KycContent() {
+function KycOnrampContent() {
   return (
     <div className="msg-rich">
-      <p>KYC requirements for route 4 (stablecoin):</p>
+      <p>Checking KYC requirements for Route 4 (stablecoin):</p>
       <div className="kyc-section">
         <p><strong>On-ramp — Coinbase Institutional (GBP → USDC)</strong></p>
         <p>· Existing Coinbase account on file — KYC previously verified, no new forms required</p>
         <p>· GBP source of funds: Barclays current account **** 8842</p>
       </div>
+    </div>
+  )
+}
+
+function KycOfframpContent() {
+  return (
+    <div className="msg-rich">
       <div className="kyc-section">
         <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
         <p>· Identity: name, DOB, address from stored profile</p>
         <p>· Government ID: Passport ****4829</p>
         <p>· Travel Rule packet: GBP/CNY corridor, auto-generated</p>
-      </div>
-
-      <div className="kyc-confirm-block" aria-live="polite">
-        <p className="kyc-confirm-line kyc-confirm-done"><strong>On-ramp KYC satisfied</strong> — Coinbase checks cleared for this transfer; nothing else needed from you.</p>
-        <p className="kyc-confirm-line kyc-confirm-done"><strong>Off-ramp KYC</strong> — Automatically handled with Airwallex from your saved profile (including Travel Rule). No action — proceed.</p>
       </div>
     </div>
   )
@@ -336,9 +354,10 @@ function PaymentContent() {
   )
 }
 
-function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }> }) {
+function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }> }) {
   if (step.kind === 'routes') return <RoutesContent />
-  if (step.kind === 'kyc') return <KycContent />
+  if (step.kind === 'kyc-onramp') return <KycOnrampContent />
+  if (step.kind === 'kyc-offramp') return <KycOfframpContent />
   if (step.kind === 'checking') return <CheckingContent text={step.text} />
   return <PaymentContent />
 }
@@ -437,7 +456,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         <div className="cx-messages" ref={msgsRef}>
           {visibleSteps.map((step, i) => {
             const prevKind = visibleSteps[i - 1]?.kind
-            const isFirstAgent = (step.kind === 'agent' || step.kind === 'routes' || step.kind === 'kyc' || step.kind === 'payment') && prevKind === 'user'
+            const isFirstAgent = (step.kind === 'agent' || step.kind === 'routes' || step.kind === 'kyc-onramp' || step.kind === 'payment') && prevKind === 'user'
             const workTime = 'workTime' in step ? step.workTime : undefined
 
             if (step.kind === 'user') return (
@@ -451,7 +470,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
             const content = step.kind === 'agent'
               ? renderAgentBody(step)
-              : <RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} />
+              : <RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }>} />
 
             return (
               <div key={step.id} className="cx-msg-agent-wrap">
@@ -532,7 +551,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
             const content = step.kind === 'agent'
               ? <div className="cl-agent-text">{renderAgentBody(step)}</div>
-              : <div className="cl-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
+              : <div className="cl-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }>} /></div>
 
             return (
               <div key={step.id} className="cl-msg-agent-wrap">
@@ -607,7 +626,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
             const content = step.kind === 'agent'
               ? <div className="gm-agent-text">{renderAgentBody(step)}</div>
-              : <div className="gm-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
+              : <div className="gm-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }>} /></div>
 
             return (
               <div key={step.id} className="gm-msg-agent-wrap">
