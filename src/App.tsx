@@ -135,6 +135,7 @@ export default function App() {
   const [visibleCount, setVisibleCount] = useState(1)
   const [runId, setRunId] = useState(1)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [waitlistOpen, setWaitlistOpen] = useState(false)
   const [notifDismissed, setNotifDismissed] = useState(false)
   const isComplete = visibleCount >= chatSteps.length
 
@@ -169,9 +170,9 @@ export default function App() {
         <p className="eyebrow">midas.ai · Agent-native payments</p>
         <h1>Your existing AI tools, now with secure access to your finance</h1>
         <p className="hero-sub">An agent-native Cross-Border remittance workflow.</p>
-        <a className="cta-btn" href="https://midas.ai/waitlist" target="_blank" rel="noopener noreferrer">
+        <button className="cta-btn" onClick={() => setWaitlistOpen(true)}>
           Join the waitlist
-        </a>
+        </button>
       </section>
 
       {/* Platform switcher */}
@@ -220,9 +221,9 @@ export default function App() {
       </section>
 
       <div className="cta-section">
-        <a className="cta-btn" href="https://midas.ai/waitlist" target="_blank" rel="noopener noreferrer">
+        <button className="cta-btn" onClick={() => setWaitlistOpen(true)}>
           Join the waitlist
-        </a>
+        </button>
       </div>
 
       <footer className="site-footer">
@@ -239,6 +240,8 @@ export default function App() {
         </div>
       </footer>
 
+      {waitlistOpen && <WaitlistModal onClose={() => setWaitlistOpen(false)} />}
+
       <aside className={`mac-notif ${notifOpen ? 'is-visible' : ''}`} aria-hidden={!notifOpen}>
         <div className="wechat-icon">
           <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -253,6 +256,77 @@ export default function App() {
         <button className="notif-close" onClick={() => { setNotifOpen(false); setNotifDismissed(true) }}>×</button>
       </aside>
     </main>
+  )
+}
+
+// ── Waitlist modal ─────────────────────────────────────────────────────────────
+
+function WaitlistModal({ onClose }: { onClose: () => void }) {
+  const [fields, setFields] = useState({ name: '', email: '', linkedin: '' })
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitted(true)
+  }
+
+  return (
+    <div className="wl-backdrop" onClick={onClose}>
+      <div className="wl-panel" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Join the waitlist">
+        <button className="wl-close" onClick={onClose} aria-label="Close">×</button>
+
+        {submitted ? (
+          <div className="wl-success">
+            <p className="wl-success-mark">·</p>
+            <h2>You're on the list.</h2>
+            <p>We'll reach out to <strong>{fields.email}</strong> when early access opens.</p>
+          </div>
+        ) : (
+          <>
+            <div className="wl-header">
+              <p className="wl-eyebrow">midas.ai · Early access</p>
+              <h2 className="wl-title">Join the waitlist</h2>
+              <p className="wl-sub">We're onboarding a small group of early users. Drop your details and we'll be in touch.</p>
+            </div>
+            <form className="wl-form" onSubmit={handleSubmit}>
+              <label className="wl-label">
+                Full name
+                <input
+                  className="wl-input"
+                  type="text"
+                  placeholder="James Anderson"
+                  value={fields.name}
+                  onChange={e => setFields(f => ({ ...f, name: e.target.value }))}
+                  required
+                />
+              </label>
+              <label className="wl-label">
+                Email
+                <input
+                  className="wl-input"
+                  type="email"
+                  placeholder="james@example.com"
+                  value={fields.email}
+                  onChange={e => setFields(f => ({ ...f, email: e.target.value }))}
+                  required
+                />
+              </label>
+              <label className="wl-label">
+                LinkedIn URL
+                <input
+                  className="wl-input"
+                  type="url"
+                  placeholder="https://linkedin.com/in/yourname"
+                  value={fields.linkedin}
+                  onChange={e => setFields(f => ({ ...f, linkedin: e.target.value }))}
+                />
+              </label>
+              <button className="wl-submit" type="submit">Request early access</button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 
