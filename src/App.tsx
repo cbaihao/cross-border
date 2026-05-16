@@ -46,7 +46,7 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 900,
     workTime: '1s',
-    text: 'midas.ai connected. Sending a one-time passcode to j***@gmail.com — paste it here to verify your account.',
+    text: 'midas.ai connected. Sending a one-time passcode to s***@gmail.com — paste it here to verify your account.',
   },
   {
     id: 'user-otp',
@@ -59,7 +59,7 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 900,
     workTime: '2s',
-    text: 'Authenticated as James A. via midas.ai. Linked accounts found. Scanning all available GBP → CNY routes for £100...',
+    text: 'Authenticated as Summer via midas.ai. Linked accounts found. Scanning all available GBP → CNY routes for £100...',
   },
   {
     id: 'routes',
@@ -291,7 +291,7 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
                 <input
                   className="wl-input"
                   type="text"
-                  placeholder="James Anderson"
+                  placeholder="Summer"
                   value={fields.name}
                   onChange={e => setFields(f => ({ ...f, name: e.target.value }))}
                   required
@@ -302,7 +302,7 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
                 <input
                   className="wl-input"
                   type="email"
-                  placeholder="james@example.com"
+                  placeholder="summer@example.com"
                   value={fields.email}
                   onChange={e => setFields(f => ({ ...f, email: e.target.value }))}
                   required
@@ -523,7 +523,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               <div key={step.id} className="cx-msg-agent-wrap">
                 {workTime && <div className="cx-worked-row">Worked for {workTime} ›</div>}
                 <div className="cx-msg-agent"><div className="cx-agent-text">{content}</div></div>
-                {(step.kind === 'agent' || step.kind === 'kyc') && <div className="cx-msg-agent-actions"><button><CopyIcon /></button></div>}
+                <div className="cx-msg-agent-actions"><button><CopyIcon /></button></div>
               </div>
             )
           })}
@@ -575,8 +575,8 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         </div>
         <div className="cl-sidebar-footer">
           <div className="cl-user-row">
-            <div className="cl-avatar">J</div>
-            <div className="cl-user-info"><strong>James</strong><span>Pro plan</span></div>
+            <div className="cl-avatar">S</div>
+            <div className="cl-user-info"><strong>Summer</strong><span>Pro plan</span></div>
             <span className="cl-user-arrow">↓</span>
           </div>
         </div>
@@ -609,7 +609,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               <div key={step.id} className="cl-msg-agent-wrap">
                 {workTime && <div className="cl-worked-row">Worked for {workTime}</div>}
                 {content}
-                {(step.kind === 'agent' || step.kind === 'kyc') && <div className="cl-msg-agent-actions"><button><CopyIcon /></button></div>}
+                <div className="cl-msg-agent-actions"><button><CopyIcon /></button></div>
               </div>
             )
           })}
@@ -696,7 +696,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                 <div className="gm-agent-body">
                   {workTime && <div className="gm-worked-row">Worked for {workTime}</div>}
                   {content}
-                  {(step.kind === 'agent' || step.kind === 'kyc') && <div className="gm-agent-actions"><button>↗</button></div>}
+                  <div className="gm-agent-actions"><button>↗</button></div>
                 </div>
               </div>
             )
