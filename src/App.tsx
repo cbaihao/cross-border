@@ -82,14 +82,14 @@ const chatSteps: ChatStep[] = [
   {
     id: 'kyc-checking',
     kind: 'checking',
-    delayMs: 600,
-    text: 'Checking — may require user input...',
-    doneText: 'No further user input required.',
+    delayMs: 400,
+    text: 'Checking if any information is required from the user...',
+    doneText: 'No further information required from the user.',
   },
   {
     id: 'payment',
     kind: 'payment',
-    delayMs: 7000,
+    delayMs: 4800,
     workTime: '6s',
   },
   {
@@ -321,7 +321,7 @@ function CheckingContent({ text, doneText }: { text: string; doneText?: string }
   const [done, setDone] = useState(false)
   useEffect(() => {
     if (!doneText) return
-    const t = setTimeout(() => setDone(true), 2000)
+    const t = setTimeout(() => setDone(true), 3000)
     return () => clearTimeout(t)
   }, [doneText])
 
