@@ -165,7 +165,7 @@ export default function App() {
     <main className="page">
       <section className="hero">
         <p className="eyebrow">midas.ai · Agent-native payments</p>
-        <h1>Your existing AI tools, now with secure access to your finance</h1>
+        <h1>Your AI tools, now with secure access to your finance</h1>
         <p className="hero-sub">An agent-native Cross-Border remittance workflow.</p>
         <button className="cta-btn" onClick={() => setWaitlistOpen(true)}>
           Join the waitlist
