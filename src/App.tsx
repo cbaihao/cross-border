@@ -116,12 +116,9 @@ const chatSteps: ChatStep[] = [
 /** Hide transient interim bubbles once the next phase is revealed. */
 function visibleStepsForDemo(visibleCount: number): ChatStep[] {
   const slice = chatSteps.slice(0, visibleCount)
-  const paymentIdx = chatSteps.findIndex(s => s.id === 'payment')  // kyc-checking hides once payment visible
   const doneIdx = chatSteps.findIndex(s => s.id === 'x-done')
-  const paymentVisible = paymentIdx >= 0 && visibleCount > paymentIdx
   const transferDoneVisible = doneIdx >= 0 && visibleCount > doneIdx
   return slice.filter(s => {
-    if (s.id === 'kyc-checking' && paymentVisible) return false
     if (s.id === 'x-submit' && transferDoneVisible) return false
     return true
   })
@@ -402,7 +399,7 @@ function CheckingContent({ text, doneText }: { text: string; doneText?: string }
   return (
     <div className="msg-rich">
       {done
-        ? <p className="checking-done">{doneText}</p>
+        ? <p>{doneText}</p>
         : <p className="checking-line"><span className="typing-dots"><i /><i /><i /></span>{text}</p>
       }
     </div>
@@ -468,7 +465,12 @@ function renderAgentBody(step: Extract<ChatStep, { kind: 'agent' }>) {
 
 function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
   const msgsRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight }, [visibleSteps.length])
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [visibleSteps.length])
 
   return (
     <div className="cx-window">
@@ -544,7 +546,12 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
 function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
   const msgsRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight }, [visibleSteps.length])
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [visibleSteps.length])
 
   return (
     <div className="cl-window">
@@ -636,7 +643,12 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
 function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
   const msgsRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight }, [visibleSteps.length])
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [visibleSteps.length])
 
   return (
     <div className="gm-window">
