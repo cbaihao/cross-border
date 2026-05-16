@@ -19,7 +19,7 @@ type ChatStep =
 
 // ── Timeline ──────────────────────────────────────────────────────────────────
 
-export const TRACK_TRANSACTIONS_URL = 'https://midas.ai/myaccount/transactions'
+export const TRACK_TRANSACTIONS_URL = 'https://trymidas.live/myaccount/transactions'
 
 const chatSteps: ChatStep[] = [
   {
@@ -39,7 +39,7 @@ const chatSteps: ChatStep[] = [
     id: 'user-install',
     kind: 'user',
     delayMs: 3000,
-    text: 'Get access to my finance using midas.ai, set up secure access following this guide https://midas.ai/skills/setup.md',
+    text: 'Get access to my finance using midas.ai and set up following this guide https://trymidas.live/skills/setup.md',
   },
   {
     id: 'x-otp',
@@ -164,12 +164,13 @@ export default function App() {
   return (
     <main className="page">
       <section className="hero">
-        <p className="eyebrow">midas.ai</p>
-        <h1>Your AI tools,<br />securely handles payment</h1>
-        <p className="hero-sub">An agent-native Cross-Border remittance workflow.</p>
+        <p className="eyebrow">Midas</p>
+        <h1>Your AI tools,<br />send money in seconds</h1>
+        <p className="hero-sub">Send money abroad? Don't open another app. Just ask your AI.</p>
         <button className="cta-btn" onClick={() => setWaitlistOpen(true)}>
           Join the waitlist
         </button>
+        <p className="hero-currencies">50+ currencies supported</p>
       </section>
 
       {/* Platform switcher */}
@@ -223,6 +224,11 @@ export default function App() {
         </button>
       </div>
 
+      <section className="why-midas">
+        <h2 className="why-midas-title">Why Midas?</h2>
+        <p className="why-midas-body">King Midas turned everything he touched into gold. We turn everything you say into money sent.</p>
+      </section>
+
       <footer className="site-footer">
         <div className="footer-inner">
           <span className="footer-brand">midas.ai</span>
@@ -230,8 +236,6 @@ export default function App() {
             <a href="#">About</a>
             <a href="#">Terms of Service</a>
             <a href="#">Privacy Policy</a>
-            <a href="#">Licenses</a>
-            <a href="#">Contact</a>
           </nav>
           <span className="footer-copy">&copy; 2026 Midas Financial Technologies Ltd. All rights reserved.</span>
         </div>
@@ -439,7 +443,7 @@ function TransferDoneContent() {
       </p>
       <p className="track-label"><strong>Track your transaction:</strong></p>
       <p className="track-link-wrap">
-        <a href={TRACK_TRANSACTIONS_URL} target="_blank" rel="noopener noreferrer" className="track-link">{TRACK_TRANSACTIONS_URL}</a>
+        <span className="track-link">{TRACK_TRANSACTIONS_URL}</span>
       </p>
       <p className="transfer-done-foot subtle">You'll get a push notification when funds land.</p>
     </div>
@@ -566,8 +570,6 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           <div className="cl-nav-item">— Chats</div>
           <div className="cl-nav-item">— Projects</div>
           <div className="cl-nav-item">&lt;/&gt; Code</div>
-          <div className="cl-nav-item">· Customize</div>
-          <div className="cl-nav-more">∨ More</div>
         </nav>
         <div className="cl-recents">
           <p className="cl-recents-label">Recents</p>
@@ -585,7 +587,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
       <div className="cl-main">
         <div className="cl-main-header">
           <div className="cl-chat-title-wrap">
-            <span className="cl-chat-title">USD → CNY transfer ∨</span>
+            <span className="cl-chat-title">USD → CNY transfer</span>
           </div>
           <button className="cl-share-btn">Share</button>
         </div>
@@ -654,10 +656,9 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
     <div className="gm-window">
       <aside className="gm-sidebar">
         <button className="gm-icon-btn">☰</button>
-        <button className="gm-icon-btn">✏</button>
         <div className="gm-sidebar-spacer" />
         <button className="gm-icon-btn">◷</button>
-        <button className="gm-icon-btn">⚙</button>
+        <button className="gm-icon-btn"><GeminiSettingsIcon /></button>
       </aside>
 
       <div className="gm-main">
@@ -669,7 +670,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           <div className="gm-header-right">
             <span className="gm-header-icon">⊕</span>
             <span className="gm-header-icon">⋯</span>
-            <div className="gm-avatar">B</div>
+            <div className="gm-avatar">S</div>
           </div>
         </div>
 
@@ -734,6 +735,16 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
+function GeminiSettingsIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="7" cy="5" r="1.5" fill="white" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="11" cy="9" r="1.5" fill="white" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="7" cy="13" r="1.5" fill="white" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  )
+}
 function PlusIcon() { return <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2v9M2 6.5h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> }
 function SearchIcon() { return <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="3.5" stroke="currentColor" strokeWidth="1.4"/><path d="M9 9l2.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg> }
 function SettingsIcon() { return <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="2" stroke="currentColor" strokeWidth="1.4"/><path d="M6.5 1v1M6.5 11v1M1 6.5h1M11 6.5h1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg> }
