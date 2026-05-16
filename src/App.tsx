@@ -13,8 +13,7 @@ type ChatStep =
   | { id: string; delayMs: number; kind: 'user'; text: string }
   | { id: string; delayMs: number; kind: 'agent'; workTime: string; text: string; install?: string }
   | { id: string; delayMs: number; kind: 'routes'; workTime: string }
-  | { id: string; delayMs: number; kind: 'kyc-onramp' }
-  | { id: string; delayMs: number; kind: 'kyc-offramp' }
+  | { id: string; delayMs: number; kind: 'kyc'; workTime: string }
   | { id: string; delayMs: number; kind: 'checking'; text: string; doneText?: string }
   | { id: string; delayMs: number; kind: 'payment'; workTime: string }
 
@@ -75,14 +74,10 @@ const chatSteps: ChatStep[] = [
     text: '4',
   },
   {
-    id: 'kyc-onramp',
-    kind: 'kyc-onramp',
+    id: 'kyc',
+    kind: 'kyc',
     delayMs: 1200,
-  },
-  {
-    id: 'kyc-offramp',
-    kind: 'kyc-offramp',
-    delayMs: 1800,
+    workTime: '3s',
   },
   {
     id: 'kyc-checking',
@@ -121,7 +116,7 @@ const chatSteps: ChatStep[] = [
 /** Hide transient interim bubbles once the next phase is revealed. */
 function visibleStepsForDemo(visibleCount: number): ChatStep[] {
   const slice = chatSteps.slice(0, visibleCount)
-  const paymentIdx = chatSteps.findIndex(s => s.id === 'payment')
+  const paymentIdx = chatSteps.findIndex(s => s.id === 'payment')  // kyc-checking hides once payment visible
   const doneIdx = chatSteps.findIndex(s => s.id === 'x-done')
   const paymentVisible = paymentIdx >= 0 && visibleCount > paymentIdx
   const transferDoneVisible = doneIdx >= 0 && visibleCount > doneIdx
@@ -303,28 +298,20 @@ function RoutesContent() {
   )
 }
 
-function KycOnrampContent() {
+function KycContent() {
   return (
     <div className="msg-rich">
       <p>Checking KYC requirements for Route 4 (stablecoin):</p>
-      <div className="kyc-section">
-        <p><strong>On-ramp — Coinbase Institutional (GBP → USDC)</strong></p>
-        <p>· Existing Coinbase account on file, KYC previously verified</p>
-      </div>
-    </div>
-  )
-}
-
-function KycOfframpContent() {
-  return (
-    <div className="msg-rich">
-      <div className="kyc-section">
-        <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
-        <p>· KYC profile on file</p>
-        <p>· Travel Rule required for this corridor</p>
-        <p className="kyc-indent">· Full legal name</p>
-        <p className="kyc-indent">· Date of birth and residential address</p>
-        <p className="kyc-indent">· Government-issued ID (Passport ****4829)</p>
+      <div className="kyc-tiles">
+        <div className="kyc-section kyc-section--onramp">
+          <p><strong>On-ramp — Coinbase Institutional (GBP → USDC)</strong></p>
+          <p>· Existing Coinbase account on file, KYC previously verified</p>
+        </div>
+        <div className="kyc-section kyc-section--offramp">
+          <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
+          <p>· KYC profile on file, Travel Rule required for this corridor</p>
+          <p>· Required fields: full legal name, date of birth, residential address, government-issued ID (Passport ****4829)</p>
+        </div>
       </div>
     </div>
   )
@@ -366,50 +353,24 @@ function PaymentContent() {
   )
 }
 
-function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }> }) {
+function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }> }) {
   if (step.kind === 'routes') return <RoutesContent />
-  if (step.kind === 'kyc-onramp') return <KycOnrampContent />
-  if (step.kind === 'kyc-offramp') return <KycOfframpContent />
+  if (step.kind === 'kyc') return <KycContent />
   if (step.kind === 'checking') return <CheckingContent text={step.text} doneText={step.doneText} />
   return <PaymentContent />
 }
-
-const PIPELINE_LEGS = [
-  { id: 'onramp', label: 'Coinbase', sub: 'GBP → USDC' },
-  { id: 'bridge', label: 'Bridge', sub: 'USDC rail' },
-  { id: 'offramp', label: 'Airwallex', sub: 'USDC → CNY' },
-  { id: 'payout', label: 'WeChat', sub: 'Wallet payout' },
-] as const
 
 function TransferDoneContent() {
   return (
     <div className="msg-rich transfer-done-rich">
       <p>
-        Transfer submitted. Coinbase on-ramp filled, USDC bridge processed, and Airwallex CNY payout is underway toward your WeChat Wallet
-        (<strong>¥909.40</strong>).
+        Transfer submitted. Coinbase on-ramp filled, USDC bridge processed, Airwallex CNY payout underway to your WeChat Wallet (<strong>¥909.40</strong>).
       </p>
-      <p className="track-label"><strong>Track your transaction under:</strong></p>
+      <p className="track-label"><strong>Track your transaction:</strong></p>
       <p className="track-link-wrap">
         <a href={TRACK_TRANSACTIONS_URL} target="_blank" rel="noopener noreferrer" className="track-link">{TRACK_TRANSACTIONS_URL}</a>
       </p>
-
-      <div className="pipeline-track" aria-label="Transfer pipeline progress">
-        <p className="pipeline-caption">Pipeline status</p>
-        <div className="pipeline-bar">
-          {PIPELINE_LEGS.map((leg, i) => (
-            <div key={leg.id} className="pipeline-segment">
-              {i > 0 && <span className="pipeline-connector" aria-hidden="true" />}
-              <div className="pipeline-node">
-                <span className="pipeline-dot pipeline-dot--done" aria-hidden="true" />
-                <span className="pipeline-leg-label">{leg.label}</span>
-                <span className="pipeline-leg-sub">{leg.sub}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <p className="transfer-done-foot subtle">Timing updates live on the tracker — you&apos;ll get a push when funds land.</p>
+      <p className="transfer-done-foot subtle">You'll get a push notification when funds land.</p>
     </div>
   )
 }
@@ -466,10 +427,8 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         </div>
 
         <div className="cx-messages" ref={msgsRef}>
-          {visibleSteps.map((step, i) => {
-            const prevKind = visibleSteps[i - 1]?.kind
-            const isFirstAgent = (step.kind === 'agent' || step.kind === 'routes' || step.kind === 'kyc-onramp' || step.kind === 'payment') && prevKind === 'user'
-            const workTime = 'workTime' in step ? step.workTime : undefined
+          {visibleSteps.map((step) => {
+            const workTime = 'workTime' in step ? (step as { workTime: string }).workTime : undefined
 
             if (step.kind === 'user') return (
               <div key={step.id} className="cx-msg-user-wrap">
@@ -482,13 +441,13 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
             const content = step.kind === 'agent'
               ? renderAgentBody(step)
-              : <RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }>} />
+              : <RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} />
 
             return (
               <div key={step.id} className="cx-msg-agent-wrap">
-                {isFirstAgent && workTime && <div className="cx-worked-row">Worked for {workTime} ›</div>}
+                {workTime && <div className="cx-worked-row">Worked for {workTime} ›</div>}
                 <div className="cx-msg-agent"><div className="cx-agent-text">{content}</div></div>
-                {step.kind === 'agent' && <div className="cx-msg-agent-actions"><button><CopyIcon /></button></div>}
+                {(step.kind === 'agent' || step.kind === 'kyc') && <div className="cx-msg-agent-actions"><button><CopyIcon /></button></div>}
               </div>
             )
           })}
@@ -552,6 +511,8 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
         <div className="cl-messages" ref={msgsRef}>
           {visibleSteps.map((step) => {
+            const workTime = 'workTime' in step ? (step as { workTime: string }).workTime : undefined
+
             if (step.kind === 'user') return (
               <div key={step.id} className="cl-msg-user-wrap">
                 <div className="cl-msg-user"><p>{step.text}</p></div>
@@ -561,12 +522,13 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
             const content = step.kind === 'agent'
               ? <div className="cl-agent-text">{renderAgentBody(step)}</div>
-              : <div className="cl-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }>} /></div>
+              : <div className="cl-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
 
             return (
               <div key={step.id} className="cl-msg-agent-wrap">
+                {workTime && <div className="cl-worked-row">Worked for {workTime}</div>}
                 {content}
-                {step.kind === 'agent' && <div className="cl-msg-agent-actions"><button><CopyIcon /></button></div>}
+                {(step.kind === 'agent' || step.kind === 'kyc') && <div className="cl-msg-agent-actions"><button><CopyIcon /></button></div>}
               </div>
             )
           })}
@@ -627,6 +589,8 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
         <div className="gm-messages" ref={msgsRef}>
           {visibleSteps.map((step) => {
+            const workTime = 'workTime' in step ? (step as { workTime: string }).workTime : undefined
+
             if (step.kind === 'user') return (
               <div key={step.id} className="gm-msg-user-wrap">
                 <div className="gm-msg-user-actions"><button><CopyIcon /></button><button><EditIcon /></button></div>
@@ -636,7 +600,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
             const content = step.kind === 'agent'
               ? <div className="gm-agent-text">{renderAgentBody(step)}</div>
-              : <div className="gm-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc-onramp' | 'kyc-offramp' | 'checking' | 'payment' }>} /></div>
+              : <div className="gm-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
 
             return (
               <div key={step.id} className="gm-msg-agent-wrap">
@@ -644,9 +608,9 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                   <GeminiGIcon />
                 </div>
                 <div className="gm-agent-body">
-                  <div className="gm-show-thinking">Show thinking ∨</div>
+                  {workTime && <div className="gm-worked-row">Worked for {workTime}</div>}
                   {content}
-                  {step.kind === 'agent' && <div className="gm-agent-actions"><button>↗</button></div>}
+                  {(step.kind === 'agent' || step.kind === 'kyc') && <div className="gm-agent-actions"><button>↗</button></div>}
                 </div>
               </div>
             )
