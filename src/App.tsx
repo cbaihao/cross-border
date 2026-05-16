@@ -19,6 +19,8 @@ type ChatStep =
 
 // ── Timeline ──────────────────────────────────────────────────────────────────
 
+export const TRACK_TRANSACTIONS_URL = 'https://midas.ai/myaccount/transactions'
+
 const chatSteps: ChatStep[] = [
   {
     id: 'user-ask',
@@ -75,25 +77,12 @@ const chatSteps: ChatStep[] = [
     id: 'kyc',
     kind: 'kyc',
     delayMs: 1200,
-    workTime: '5s',
-  },
-  {
-    id: 'kyc-check',
-    kind: 'checking',
-    delayMs: 5000,
-    text: 'Verifying credentials with Coinbase and Airwallex...',
-  },
-  {
-    id: 'kyc-result',
-    kind: 'agent',
-    delayMs: 5000,
-    workTime: '5s',
-    text: 'All KYC requirements satisfied — no action needed from you. Coinbase on-ramp and Airwallex off-ramp compliance fully handled for this corridor, including Travel Rule.',
+    workTime: '2s',
   },
   {
     id: 'payment',
     kind: 'payment',
-    delayMs: 5000,
+    delayMs: 1400,
     workTime: '6s',
   },
   {
@@ -113,9 +102,18 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 5000,
     workTime: '7s',
-    text: 'Transfer submitted. Coinbase on-ramp filled. USDC bridge processed. Airwallex CNY payout initiated.\n\n¥909.40 arriving in your WeChat Wallet in approximately 12 minutes.\n\nTrack your transaction history at midas.ai/histories',
+    text: '__TRANSFER_DONE__',
   },
 ]
+
+/** Hide interim “submitting…” bubble once the completion message is shown. */
+function visibleStepsForDemo(visibleCount: number): ChatStep[] {
+  const slice = chatSteps.slice(0, visibleCount)
+  const doneIdx = chatSteps.findIndex(s => s.id === 'x-done')
+  const transferDoneVisible = doneIdx >= 0 && visibleCount > doneIdx
+  if (!transferDoneVisible) return slice
+  return slice.filter(s => s.id !== 'x-submit')
+}
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -137,30 +135,31 @@ export default function App() {
 
   useEffect(() => {
     if (!isComplete || notifDismissed) return
-    const t = window.setTimeout(() => setNotifOpen(true), 1800)
+    const delayMs = 5500 + Math.floor(Math.random() * 4500)
+    const t = window.setTimeout(() => setNotifOpen(true), delayMs)
     return () => window.clearTimeout(t)
   }, [isComplete, notifDismissed, runId])
 
-const restart = () => {
+  const restart = () => {
     setVisibleCount(1)
     setNotifOpen(false)
     setNotifDismissed(false)
     setRunId(id => id + 1)
   }
 
-  const visibleSteps = chatSteps.slice(0, visibleCount)
+  const visibleSteps = visibleStepsForDemo(visibleCount)
   const lastStep = visibleSteps[visibleSteps.length - 1]
   const showThinking = !isComplete && lastStep?.kind === 'user'
 
   return (
     <main className="page">
       <section className="hero">
-        <p className="eyebrow">X · Agent-native payments</p>
-        <h1>Works in every AI tool you already use</h1>
-        <p className="hero-sub">
-          Drop one line into Codex, Claude, or Gemini. Same transfer, same result —
-          your agent handles it while staying in its native interface.
-        </p>
+        <p className="eyebrow">midas.ai · Agent-native payments</p>
+        <h1>Your existing AI tools, now with secure access to your finance</h1>
+        <p className="hero-sub">An agent-native Cross-Border remittance workflow.</p>
+        <a className="cta-btn" href="https://midas.ai/waitlist" target="_blank" rel="noopener noreferrer">
+          Join the waitlist
+        </a>
       </section>
 
       {/* Platform switcher */}
@@ -208,6 +207,26 @@ const restart = () => {
         </div>
       </section>
 
+      <div className="cta-section">
+        <a className="cta-btn" href="https://midas.ai/waitlist" target="_blank" rel="noopener noreferrer">
+          Join the waitlist
+        </a>
+      </div>
+
+      <footer className="site-footer">
+        <div className="footer-inner">
+          <span className="footer-brand">midas.ai</span>
+          <nav className="footer-links" aria-label="Footer">
+            <a href="#">About</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Licenses</a>
+            <a href="#">Contact</a>
+          </nav>
+          <span className="footer-copy">&copy; 2026 Midas Financial Technologies Ltd. All rights reserved.</span>
+        </div>
+      </footer>
+
       <aside className={`mac-notif ${notifOpen ? 'is-visible' : ''}`} aria-hidden={!notifOpen}>
         <div className="wechat-icon">
           <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -239,14 +258,30 @@ type WindowProps = {
 function RoutesContent() {
   return (
     <div className="msg-rich">
-      <p>Here are 4 routes for your £100 GBP → CNY transfer:</p>
-      <p>
-        1. Bank wire (SWIFT) — ¥769.08 received, £12.00 fee, 3–5 days<br/>
-        2. Wise (local payout) — ¥905.17 received, £1.39 fee, same day<br/>
-        3. Western Union (card + local) — ¥861.39 received, £3.90 fee, minutes<br/>
-        4. Stablecoin route (GBP on-ramp → USDC → CNY off-ramp) — ¥909.40 received, £0.48 fee, ~12 min — best rate
-      </p>
-      <p>Which would you like? Reply 1, 2, 3, or 4.</p>
+      <p>Four GBP → CNY options for £100:</p>
+      <div className="route-rows">
+        <div className="route-row">
+          <span className="route-num">1</span>
+          <span className="route-name">Bank wire (SWIFT)</span>
+          <span className="route-stats">¥769.08 &nbsp;·&nbsp; £12.00 fee &nbsp;·&nbsp; 3–5 days</span>
+        </div>
+        <div className="route-row">
+          <span className="route-num">2</span>
+          <span className="route-name">Wise</span>
+          <span className="route-stats">¥905.17 &nbsp;·&nbsp; £1.39 fee &nbsp;·&nbsp; same day</span>
+        </div>
+        <div className="route-row">
+          <span className="route-num">3</span>
+          <span className="route-name">Western Union</span>
+          <span className="route-stats">¥861.39 &nbsp;·&nbsp; £3.90 fee &nbsp;·&nbsp; minutes</span>
+        </div>
+        <div className="route-row route-row--best">
+          <span className="route-num route-num--best">4</span>
+          <span className="route-name">Stablecoin <span className="best-tag">Recommended</span></span>
+          <span className="route-stats"><strong className="best-amt">¥909.40</strong> &nbsp;·&nbsp; £0.48 fee &nbsp;·&nbsp; ~12 min &nbsp;·&nbsp; GBP → USDC → CNY</span>
+        </div>
+      </div>
+      <p className="route-prompt">Reply <strong>1</strong>, <strong>2</strong>, <strong>3</strong>, or <strong>4</strong>.</p>
     </div>
   )
 }
@@ -265,6 +300,11 @@ function KycContent() {
         <p>· Identity: name, DOB, address from stored profile</p>
         <p>· Government ID: Passport ****4829</p>
         <p>· Travel Rule packet: GBP/CNY corridor, auto-generated</p>
+      </div>
+
+      <div className="kyc-confirm-block" aria-live="polite">
+        <p className="kyc-confirm-line kyc-confirm-done"><strong>On-ramp KYC satisfied</strong> — Coinbase checks cleared for this transfer; nothing else needed from you.</p>
+        <p className="kyc-confirm-line kyc-confirm-done"><strong>Off-ramp KYC</strong> — Automatically handled with Airwallex from your saved profile (including Travel Rule). No action — proceed.</p>
       </div>
     </div>
   )
@@ -288,7 +328,7 @@ function PaymentContent() {
         <div className="pay-row-t"><span>Fee</span><span>£0.48</span></div>
         <div className="pay-row-t pay-hl"><span><strong>You receive</strong></span><span><strong>¥909.40 CNY</strong></span></div>
         <div className="pay-row-t"><span>Route</span><span>Coinbase → USDC → Airwallex → CNY</span></div>
-        <div className="pay-row-t"><span>Arrives</span><span>~12 min · WeChat Wallet</span></div>
+        <div className="pay-row-t"><span>Destination</span><span>WeChat Wallet · ETA after send on tracker</span></div>
       </div>
       <p><strong>Funded from:</strong> Barclays current account ending **** 8842</p>
       <p>Reply <strong>confirm</strong> to proceed, or <strong>cancel</strong> to stop.</p>
@@ -301,6 +341,61 @@ function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc
   if (step.kind === 'kyc') return <KycContent />
   if (step.kind === 'checking') return <CheckingContent text={step.text} />
   return <PaymentContent />
+}
+
+const PIPELINE_LEGS = [
+  { id: 'onramp', label: 'Coinbase', sub: 'GBP → USDC' },
+  { id: 'bridge', label: 'Bridge', sub: 'USDC rail' },
+  { id: 'offramp', label: 'Airwallex', sub: 'USDC → CNY' },
+  { id: 'payout', label: 'WeChat', sub: 'Wallet payout' },
+] as const
+
+function TransferDoneContent() {
+  return (
+    <div className="msg-rich transfer-done-rich">
+      <p>
+        Transfer submitted. Coinbase on-ramp filled, USDC bridge processed, and Airwallex CNY payout is underway toward your WeChat Wallet
+        (<strong>¥909.40</strong>).
+      </p>
+      <p className="track-label"><strong>Track your transaction under:</strong></p>
+      <p className="track-link-wrap">
+        <a href={TRACK_TRANSACTIONS_URL} target="_blank" rel="noopener noreferrer" className="track-link">{TRACK_TRANSACTIONS_URL}</a>
+      </p>
+
+      <div className="pipeline-track" aria-label="Transfer pipeline progress">
+        <p className="pipeline-caption">Pipeline status</p>
+        <div className="pipeline-bar">
+          {PIPELINE_LEGS.map((leg, i) => (
+            <div key={leg.id} className="pipeline-segment">
+              {i > 0 && <span className="pipeline-connector" aria-hidden="true" />}
+              <div className="pipeline-node">
+                <span className="pipeline-dot pipeline-dot--done" aria-hidden="true" />
+                <span className="pipeline-leg-label">{leg.label}</span>
+                <span className="pipeline-leg-sub">{leg.sub}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="transfer-done-foot subtle">Timing updates live on the tracker — you&apos;ll get a push when funds land.</p>
+    </div>
+  )
+}
+
+function renderAgentBody(step: Extract<ChatStep, { kind: 'agent' }>) {
+  if (step.id === 'x-done') return <TransferDoneContent />
+  return (
+    <>
+      {step.text.split('\n\n').map((p, j) => <p key={j}>{p}</p>)}
+      {step.install && (
+        <div className="cx-code-block">
+          <div className="cx-code-lang">sh</div>
+          <pre><code><span className="cx-code-kw">claude</span>{' mcp add x-pay https://x.money/mcp'}</code></pre>
+        </div>
+      )}
+    </>
+  )
 }
 
 // ── CODEX WINDOW ──────────────────────────────────────────────────────────────
@@ -355,17 +450,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
             )
 
             const content = step.kind === 'agent'
-              ? (
-                <>
-                  {step.text.split('\n\n').map((p, j) => <p key={j}>{p}</p>)}
-                  {step.install && (
-                    <div className="cx-code-block">
-                      <div className="cx-code-lang">sh</div>
-                      <pre><code><span className="cx-code-kw">claude</span>{' mcp add x-pay https://x.money/mcp'}</code></pre>
-                    </div>
-                  )}
-                </>
-              )
+              ? renderAgentBody(step)
               : <RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} />
 
             return (
@@ -445,19 +530,8 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               </div>
             )
 
-            const isInstall = step.kind === 'agent' && step.install
             const content = step.kind === 'agent'
-              ? (
-                <div className="cl-agent-text">
-                  {step.text.split('\n\n').map((p, j) => <p key={j}>{p}</p>)}
-                  {isInstall && (
-                    <div className="cl-code-block">
-                      <span className="cl-code-label">sh</span>
-                      <pre><code><span className="cl-code-kw">claude</span>{' mcp add x-pay https://x.money/mcp'}</code></pre>
-                    </div>
-                  )}
-                </div>
-              )
+              ? <div className="cl-agent-text">{renderAgentBody(step)}</div>
               : <div className="cl-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
 
             return (
@@ -532,16 +606,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
             )
 
             const content = step.kind === 'agent'
-              ? (
-                <div className="gm-agent-text">
-                  {step.text.split('\n\n').map((p, j) => <p key={j}>{p}</p>)}
-                  {step.install && (
-                    <div className="gm-code-block">
-                      <pre><code><span className="gm-code-kw">claude</span>{' mcp add x-pay https://x.money/mcp'}</code></pre>
-                    </div>
-                  )}
-                </div>
-              )
+              ? <div className="gm-agent-text">{renderAgentBody(step)}</div>
               : <div className="gm-agent-text"><RichContent step={step as Extract<ChatStep, { kind: 'routes' | 'kyc' | 'checking' | 'payment' }>} /></div>
 
             return (
