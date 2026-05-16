@@ -26,7 +26,7 @@ const chatSteps: ChatStep[] = [
     id: 'user-ask',
     kind: 'user',
     delayMs: 0,
-    text: 'i need you to send 100 GBP to my CNY wechat account. can you do it?',
+    text: 'i need you to send 100 USD to my CNY wechat account. can you do it?',
   },
   {
     id: 'agent-decline',
@@ -59,7 +59,7 @@ const chatSteps: ChatStep[] = [
     kind: 'agent',
     delayMs: 900,
     workTime: '2s',
-    text: 'Authenticated as Summer via midas.ai. Linked accounts found. Scanning all available GBP → CNY routes for £100...',
+    text: 'Authenticated as Summer via midas.ai. Linked accounts found. Scanning all available USD → CNY routes for $100...',
   },
   {
     id: 'routes',
@@ -248,7 +248,7 @@ export default function App() {
         </div>
         <div>
           <div className="notif-topline"><strong>WeChat</strong><span>now</span></div>
-          <p>X delivered ¥909.40 CNY to your WeChat Wallet.</p>
+          <p>midas.ai delivered ¥677.45 CNY to your WeChat Wallet.</p>
         </div>
         <button className="notif-close" onClick={() => { setNotifOpen(false); setNotifDismissed(true) }}>×</button>
       </aside>
@@ -341,27 +341,27 @@ type WindowProps = {
 function RoutesContent() {
   return (
     <div className="msg-rich">
-      <p>Four GBP → CNY options for £100:</p>
+      <p>Four USD → CNY options for $100:</p>
       <div className="route-rows">
         <div className="route-row">
           <span className="route-num">1</span>
           <span className="route-name">Bank wire (SWIFT)</span>
-          <span className="route-stats">¥769.08 &nbsp;·&nbsp; £12.00 fee &nbsp;·&nbsp; 3–5 days</span>
+          <span className="route-stats">¥608.14 &nbsp;·&nbsp; $18.00 fee &nbsp;·&nbsp; 3–5 days</span>
         </div>
         <div className="route-row">
           <span className="route-num">2</span>
           <span className="route-name">Wise</span>
-          <span className="route-stats">¥905.17 &nbsp;·&nbsp; £1.39 fee &nbsp;·&nbsp; same day</span>
+          <span className="route-stats">¥659.28 &nbsp;·&nbsp; $2.53 fee &nbsp;·&nbsp; same day</span>
         </div>
         <div className="route-row">
           <span className="route-num">3</span>
-          <span className="route-name">Western Union</span>
-          <span className="route-stats">¥861.39 &nbsp;·&nbsp; £3.90 fee &nbsp;·&nbsp; minutes</span>
+          <span className="route-name">Remitly</span>
+          <span className="route-stats">¥642.85 &nbsp;·&nbsp; $3.99 fee &nbsp;·&nbsp; minutes</span>
         </div>
         <div className="route-row route-row--best">
           <span className="route-num route-num--best">4</span>
           <span className="route-name">Stablecoin <span className="best-tag">Recommended</span></span>
-          <span className="route-stats"><strong className="best-amt">¥909.40</strong> &nbsp;·&nbsp; £0.48 fee &nbsp;·&nbsp; ~12 min &nbsp;·&nbsp; GBP → USDC → CNY</span>
+          <span className="route-stats"><strong className="best-amt">¥677.45</strong> &nbsp;·&nbsp; $0.50 fee &nbsp;·&nbsp; ~12 min &nbsp;·&nbsp; USD → USDC → CNY</span>
         </div>
       </div>
       <p className="route-prompt">Reply <strong>1</strong>, <strong>2</strong>, <strong>3</strong>, or <strong>4</strong>.</p>
@@ -375,8 +375,8 @@ function KycContent() {
       <p>Checking KYC requirements for Route 4 (stablecoin):</p>
       <div className="kyc-tiles">
         <div className="kyc-section kyc-section--onramp">
-          <p><strong>On-ramp — Coinbase Institutional (GBP → USDC)</strong></p>
-          <p>· Existing Coinbase account on file, KYC previously verified</p>
+          <p><strong>On-ramp — Circle (USD → USDC via Chase ACH)</strong></p>
+          <p>· Linked bank account verified, ACH pull authorized</p>
         </div>
         <div className="kyc-section kyc-section--offramp">
           <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
@@ -411,14 +411,14 @@ function PaymentContent() {
     <div className="msg-rich">
       <p>Here's your transfer summary:</p>
       <div className="pay-summary">
-        <div className="pay-row-t"><span>Send</span><span>£100.00 GBP</span></div>
-        <div className="pay-row-t"><span>Rate</span><span>1 GBP = 9.09 CNY (near-spot)</span></div>
-        <div className="pay-row-t"><span>Fee</span><span>£0.48</span></div>
-        <div className="pay-row-t pay-hl"><span><strong>You receive</strong></span><span><strong>¥909.40 CNY</strong></span></div>
-        <div className="pay-row-t"><span>Route</span><span>Coinbase → USDC → Airwallex → CNY</span></div>
+        <div className="pay-row-t"><span>Send</span><span>$100.00 USD</span></div>
+        <div className="pay-row-t"><span>Rate</span><span>1 USD = 6.81 CNY (near-spot)</span></div>
+        <div className="pay-row-t"><span>Fee</span><span>$0.50</span></div>
+        <div className="pay-row-t pay-hl"><span><strong>You receive</strong></span><span><strong>¥677.45 CNY</strong></span></div>
+        <div className="pay-row-t"><span>Route</span><span>Circle → USDC → Airwallex → CNY</span></div>
         <div className="pay-row-t"><span>Destination</span><span>WeChat Wallet · ETA after send on tracker</span></div>
       </div>
-      <p><strong>Funded from:</strong> Barclays current account ending **** 8842</p>
+      <p><strong>Funded from:</strong> Chase ACH ending **** 4821</p>
       <p>Reply <strong>confirm</strong> to proceed, or <strong>cancel</strong> to stop.</p>
     </div>
   )
@@ -435,7 +435,7 @@ function TransferDoneContent() {
   return (
     <div className="msg-rich transfer-done-rich">
       <p>
-        Transfer submitted. Coinbase on-ramp filled, USDC bridge processed, Airwallex CNY payout underway to your WeChat Wallet (<strong>¥909.40</strong>).
+        Transfer submitted. Circle ACH pull initiated, USDC bridge processed, Airwallex CNY payout underway to your WeChat Wallet (<strong>¥677.45</strong>).
       </p>
       <p className="track-label"><strong>Track your transaction:</strong></p>
       <p className="track-link-wrap">
@@ -488,7 +488,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         </nav>
         <div className="cx-chats-section">
           <p className="cx-chats-label">Chats</p>
-          <div className="cx-chat-item cx-chat-active">GBP → CNY transfer</div>
+          <div className="cx-chat-item cx-chat-active">USD → CNY transfer</div>
         </div>
         <div className="cx-sidebar-footer">
           <span className="cx-footer-settings"><SettingsIcon /> Settings</span>
@@ -498,7 +498,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
 
       <div className="cx-main">
         <div className="cx-main-header">
-          <span className="cx-chat-title">GBP → CNY transfer</span>
+          <span className="cx-chat-title">USD → CNY transfer</span>
           <span className="cx-header-icons">···</span>
         </div>
 
@@ -571,7 +571,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
         </nav>
         <div className="cl-recents">
           <p className="cl-recents-label">Recents</p>
-          <div className="cl-recent-item cl-recent-active">GBP → CNY transfer <span>⋯</span></div>
+          <div className="cl-recent-item cl-recent-active">USD → CNY transfer <span>⋯</span></div>
         </div>
         <div className="cl-sidebar-footer">
           <div className="cl-user-row">
@@ -585,7 +585,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
       <div className="cl-main">
         <div className="cl-main-header">
           <div className="cl-chat-title-wrap">
-            <span className="cl-chat-title">GBP → CNY transfer ∨</span>
+            <span className="cl-chat-title">USD → CNY transfer ∨</span>
           </div>
           <button className="cl-share-btn">Share</button>
         </div>
@@ -665,7 +665,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
           <div className="gm-header-left">
             <span className="gm-wordmark">Gemini</span>
           </div>
-          <span className="gm-chat-title">GBP → CNY transfer</span>
+          <span className="gm-chat-title">USD → CNY transfer</span>
           <div className="gm-header-right">
             <span className="gm-header-icon">⊕</span>
             <span className="gm-header-icon">⋯</span>
