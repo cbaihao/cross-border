@@ -15,7 +15,7 @@ type ChatStep =
   | { id: string; delayMs: number; kind: 'routes'; workTime: string }
   | { id: string; delayMs: number; kind: 'kyc-onramp' }
   | { id: string; delayMs: number; kind: 'kyc-offramp' }
-  | { id: string; delayMs: number; kind: 'checking'; text: string }
+  | { id: string; delayMs: number; kind: 'checking'; text: string; doneText?: string }
   | { id: string; delayMs: number; kind: 'payment'; workTime: string }
 
 // ── Timeline ──────────────────────────────────────────────────────────────────
@@ -88,7 +88,8 @@ const chatSteps: ChatStep[] = [
     id: 'kyc-checking',
     kind: 'checking',
     delayMs: 600,
-    text: 'Checking all KYC requirements and existing profile...',
+    text: 'Checking — may require user input...',
+    doneText: 'No further user input required.',
   },
   {
     id: 'payment',
@@ -211,15 +212,15 @@ export default function App() {
       <section className="value-props">
         <div className="value-prop">
           <strong>Always on your side</strong>
-          <p>X has no stake in which route wins. It scans every rail — SWIFT, fintechs, stablecoin bridges — and picks the one that delivers the most to your recipient.</p>
+          <p>midas.ai has no stake in which route wins. It scans every rail across SWIFT, fintechs, and stablecoin bridges and picks the one that delivers the most to your recipient.</p>
         </div>
         <div className="value-prop">
           <strong>KYC once, reused forever</strong>
-          <p>Verify once. X stores your identity encrypted and handles every partner's KYC — on-ramp, off-ramp, Travel Rule — automatically on every transfer.</p>
+          <p>Verify once. midas.ai stores your identity encrypted and handles every partner's KYC including on-ramp, off-ramp, and Travel Rule automatically on every transfer.</p>
         </div>
         <div className="value-prop">
           <strong>Works in any AI tool</strong>
-          <p>One command. Codex, Claude, Gemini, or any MCP-compatible agent. No new app to learn — X extends the tools you already use.</p>
+          <p>One command. Codex, Claude, Gemini, or any MCP-compatible agent. No new app to learn. midas.ai extends the tools you already use.</p>
         </div>
       </section>
 
@@ -308,8 +309,7 @@ function KycOnrampContent() {
       <p>Checking KYC requirements for Route 4 (stablecoin):</p>
       <div className="kyc-section">
         <p><strong>On-ramp — Coinbase Institutional (GBP → USDC)</strong></p>
-        <p>· Existing Coinbase account on file — KYC previously verified, no new forms required</p>
-        <p>· GBP source of funds: Barclays current account **** 8842</p>
+        <p>· Existing Coinbase account on file, KYC previously verified</p>
       </div>
     </div>
   )
@@ -320,18 +320,30 @@ function KycOfframpContent() {
     <div className="msg-rich">
       <div className="kyc-section">
         <p><strong>Off-ramp — Airwallex (USDC → CNY)</strong></p>
-        <p>· Identity: name, DOB, address from stored profile</p>
-        <p>· Government ID: Passport ****4829</p>
-        <p>· Travel Rule packet: GBP/CNY corridor, auto-generated</p>
+        <p>· KYC profile on file</p>
+        <p>· Travel Rule required for this corridor</p>
+        <p className="kyc-indent">· Full legal name</p>
+        <p className="kyc-indent">· Date of birth and residential address</p>
+        <p className="kyc-indent">· Government-issued ID (Passport ****4829)</p>
       </div>
     </div>
   )
 }
 
-function CheckingContent({ text }: { text: string }) {
+function CheckingContent({ text, doneText }: { text: string; doneText?: string }) {
+  const [done, setDone] = useState(false)
+  useEffect(() => {
+    if (!doneText) return
+    const t = setTimeout(() => setDone(true), 2000)
+    return () => clearTimeout(t)
+  }, [doneText])
+
   return (
     <div className="msg-rich">
-      <p className="checking-line"><span className="typing-dots"><i /><i /><i /></span>{text}</p>
+      {done
+        ? <p className="checking-done">{doneText}</p>
+        : <p className="checking-line"><span className="typing-dots"><i /><i /><i /></span>{text}</p>
+      }
     </div>
   )
 }
@@ -358,7 +370,7 @@ function RichContent({ step }: { step: Extract<ChatStep, { kind: 'routes' | 'kyc
   if (step.kind === 'routes') return <RoutesContent />
   if (step.kind === 'kyc-onramp') return <KycOnrampContent />
   if (step.kind === 'kyc-offramp') return <KycOfframpContent />
-  if (step.kind === 'checking') return <CheckingContent text={step.text} />
+  if (step.kind === 'checking') return <CheckingContent text={step.text} doneText={step.doneText} />
   return <PaymentContent />
 }
 
@@ -476,9 +488,7 @@ function CodexWindow({ visibleSteps, showThinking, restart }: WindowProps) {
               <div key={step.id} className="cx-msg-agent-wrap">
                 {isFirstAgent && workTime && <div className="cx-worked-row">Worked for {workTime} ›</div>}
                 <div className="cx-msg-agent"><div className="cx-agent-text">{content}</div></div>
-                <div className="cx-msg-agent-actions">
-                  <button><CopyIcon /></button>
-                </div>
+                {step.kind === 'agent' && <div className="cx-msg-agent-actions"><button><CopyIcon /></button></div>}
               </div>
             )
           })}
@@ -556,7 +566,7 @@ function ClaudeWindow({ visibleSteps, showThinking, restart }: WindowProps) {
             return (
               <div key={step.id} className="cl-msg-agent-wrap">
                 {content}
-                <div className="cl-msg-agent-actions"><button><CopyIcon /></button></div>
+                {step.kind === 'agent' && <div className="cl-msg-agent-actions"><button><CopyIcon /></button></div>}
               </div>
             )
           })}
@@ -636,7 +646,7 @@ function GeminiWindow({ visibleSteps, showThinking, restart }: WindowProps) {
                 <div className="gm-agent-body">
                   <div className="gm-show-thinking">Show thinking ∨</div>
                   {content}
-                  <div className="gm-agent-actions"><button>↗</button></div>
+                  {step.kind === 'agent' && <div className="gm-agent-actions"><button>↗</button></div>}
                 </div>
               </div>
             )

@@ -280,6 +280,10 @@ h1 {
 /* ── Checking line ───────────────────────────────────────────────────────── */
 
 .checking-line { display: flex; align-items: center; gap: 8px; color: var(--muted); font-style: italic; }
+.checking-done { color: var(--muted); font-style: italic; }
+
+/* ── KYC indent ──────────────────────────────────────────────────────────── */
+.kyc-indent { padding-left: 14px; }
 
 /* ── Typing dots (shared) ────────────────────────────────────────────────── */
 
