@@ -205,16 +205,16 @@ export default function App() {
       <section className="value-props">
         <div className="value-prop">
           <strong>Always on your side</strong>
-          <p>We act in your best interest — not the bank's.</p>
+          <p>We scan every route and pick the one that gets the most money to your recipient — so you always get the best out of every transfer.</p>
           <span className="value-prop-tag">50+ currencies supported</span>
         </div>
         <div className="value-prop">
           <strong>No jargon, no forms</strong>
-          <p>Skip the paperwork. One click and AI handles the rest.</p>
+          <p>No filling the same KYC form for every leg of your transfer. Provide your info once and AI handles the rest.</p>
         </div>
         <div className="value-prop">
           <strong>Works in any AI tool</strong>
-          <p>Drop in and use — no extra learning curve.</p>
+          <p>Drop in and use with any AI tool you already have. No extra setup or learning curve.</p>
         </div>
       </section>
 
