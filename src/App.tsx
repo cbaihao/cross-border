@@ -170,7 +170,6 @@ export default function App() {
         <button className="cta-btn" onClick={() => setWaitlistOpen(true)}>
           Join the waitlist
         </button>
-        <p className="hero-currencies">50+ currencies supported</p>
       </section>
 
       {/* Platform switcher */}
@@ -207,6 +206,7 @@ export default function App() {
         <div className="value-prop">
           <strong>Always on your side</strong>
           <p>midas.ai has no stake in which route wins. It scans every rail across SWIFT, fintechs, and stablecoin bridges and picks the one that delivers the most to your recipient.</p>
+          <span className="value-prop-tag">50+ currencies supported</span>
         </div>
         <div className="value-prop">
           <strong>KYC once, reused forever</strong>
@@ -225,7 +225,7 @@ export default function App() {
       </div>
 
       <section className="why-midas">
-        <h2 className="why-midas-title">Why Midas?</h2>
+        <h2 className="why-midas-title">Why the name Midas?</h2>
         <p className="why-midas-body">King Midas turned everything he touched into gold. We turn everything you say into money sent.</p>
       </section>
 
