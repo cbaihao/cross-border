@@ -205,7 +205,7 @@ export default function App() {
       <section className="value-props">
         <div className="value-prop">
           <strong>Always on your side</strong>
-          <p>We scan every route and pick the one that gets the most money to your recipient — so you always get the best out of every transfer.</p>
+          <p>We scan every route and compare FX rate, fees, and arrival time. So you always get the best out of every transfer.</p>
           <span className="value-prop-tag">50+ currencies supported</span>
         </div>
         <div className="value-prop">
