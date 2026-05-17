@@ -205,16 +205,16 @@ export default function App() {
       <section className="value-props">
         <div className="value-prop">
           <strong>Always on your side</strong>
-          <p>midas.ai has no stake in which route wins. It scans every rail across SWIFT, fintechs, and stablecoin bridges and picks the one that delivers the most to your recipient.</p>
+          <p>We act in your best interest — not the bank's.</p>
           <span className="value-prop-tag">50+ currencies supported</span>
         </div>
         <div className="value-prop">
-          <strong>KYC once, reused forever</strong>
-          <p>Verify once. midas.ai stores your identity encrypted and handles every partner's KYC including on-ramp, off-ramp, and Travel Rule automatically on every transfer.</p>
+          <strong>No jargon, no forms</strong>
+          <p>Skip the paperwork. One click and AI handles the rest.</p>
         </div>
         <div className="value-prop">
           <strong>Works in any AI tool</strong>
-          <p>One command. Codex, Claude, Gemini, or any MCP-compatible agent. No new app to learn. midas.ai extends the tools you already use.</p>
+          <p>Drop in and use — no extra learning curve.</p>
         </div>
       </section>
 
