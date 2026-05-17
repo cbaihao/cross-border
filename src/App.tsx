@@ -39,7 +39,7 @@ const chatSteps: ChatStep[] = [
     id: 'user-install',
     kind: 'user',
     delayMs: 3000,
-    text: 'Get access to my finance using midas.ai and set up following this guide https://trymidas.live/skills/setup.md',
+    text: 'https://trymidas.live/skills/setup.md',
   },
   {
     id: 'x-otp',
